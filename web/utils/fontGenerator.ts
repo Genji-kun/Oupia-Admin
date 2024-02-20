@@ -20,5 +20,4 @@ export const BeauSans = localFont({
         },
 
     ],
-    variable: "--font-beau-sans",
 });

@@ -85,6 +85,7 @@ const config = {
       },
       fontFamily: {
         beauSans: ['var(--font-beau-sans)', 'sans-serif'],
+        montserrat: ['Montserrat', 'sans-serif'],
       },
     },
   },
