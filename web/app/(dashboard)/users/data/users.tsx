@@ -5,6 +5,8 @@ type User = {
     gender: "MALE" | "FEMALE" | "ORTHER"
     email: string
     dob: Date
+    role: "TENANT" | "LANDLORD" | "ADMIN"
+    isDeleted: boolean
 }
 
 export const users: User[] = [
@@ -15,6 +17,8 @@ export const users: User[] = [
         gender: "MALE",
         email: "vophuphat@gmail.com",
         dob: new Date("11-14-2002"),
+        role: "TENANT",
+        isDeleted: true
     },
     {
         id: "2",
@@ -23,6 +27,8 @@ export const users: User[] = [
         gender: "FEMALE",
         email: "nguyenkimbaongan@gmail.com",
         dob: new Date("02-06-2002"),
+        role: "ADMIN",
+        isDeleted: true
     },
     {
         id: "3",
@@ -31,6 +37,9 @@ export const users: User[] = [
         gender: "FEMALE",
         email: "nguyenkimbaongan@gmail.com",
         dob: new Date("02-06-2002"),
+        role: "ADMIN",
+        isDeleted: false
+
     },
     {
         id: "1",
@@ -39,6 +48,9 @@ export const users: User[] = [
         gender: "MALE",
         email: "vophuphat@gmail.com",
         dob: new Date("11-14-2002"),
+        role: "LANDLORD",
+        isDeleted: false
+
     },
     {
         id: "2",
@@ -47,6 +59,9 @@ export const users: User[] = [
         gender: "FEMALE",
         email: "nguyenkimbaongan@gmail.com",
         dob: new Date("02-06-2002"),
+        role: "LANDLORD",
+        isDeleted: true
+
     },
     {
         id: "3",
@@ -55,6 +70,8 @@ export const users: User[] = [
         gender: "MALE",
         email: "tranlelan@gmail.com",
         dob: new Date("02-06-2003"),
+        role: "TENANT",
+        isDeleted: false
     },
     {
         id: "4",
@@ -63,6 +80,8 @@ export const users: User[] = [
         gender: "MALE",
         email: "vophuphat@gmail.com",
         dob: new Date("11-14-2002"),
+        role: "TENANT",
+        isDeleted: true
     },
     {
         id: "5",
@@ -71,6 +90,8 @@ export const users: User[] = [
         gender: "FEMALE",
         email: "nguyenkimbaongan@gmail.com",
         dob: new Date("02-06-2002"),
+        role: "LANDLORD",
+        isDeleted: true
     },
     {
         id: "6",
@@ -79,6 +100,8 @@ export const users: User[] = [
         gender: "MALE",
         email: "tranlelan@gmail.com",
         dob: new Date("02-06-2003"),
+        role: "ADMIN",
+        isDeleted: true
     },
     {
         id: "7",
@@ -87,6 +110,8 @@ export const users: User[] = [
         gender: "MALE",
         email: "vophuphat@gmail.com",
         dob: new Date("11-14-2002"),
+        role: "TENANT",
+        isDeleted: true
     },
     {
         id: "8",
@@ -95,6 +120,9 @@ export const users: User[] = [
         gender: "FEMALE",
         email: "nguyenkimbaongan@gmail.com",
         dob: new Date("02-06-2002"),
+        role: "LANDLORD",
+        isDeleted: false
+
     },
     {
         id: "9",
@@ -103,5 +131,7 @@ export const users: User[] = [
         gender: "FEMALE",
         email: "tranlelan@gmail.com",
         dob: new Date("02-06-2003"),
+        role: "ADMIN",
+        isDeleted: true
     },
 ]

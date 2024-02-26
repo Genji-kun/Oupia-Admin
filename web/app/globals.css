@@ -59,7 +59,7 @@
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
@@ -71,6 +71,9 @@
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
   }
   body {
     @apply bg-background text-foreground;
@@ -82,7 +85,7 @@
 }
 
 .sidebar {
-  height: calc(100vh - 80px);
+  height: calc(100% - 80px);
 }
 
 .navbar {
@@ -101,4 +104,8 @@
 
 ::-webkit-scrollbar-thumb {
   background-color: #000000;
+}
+
+.text-full > div {
+  @apply col-span-2 text-center;
 }

@@ -1,3 +1,4 @@
+"use client"
 
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -12,6 +13,8 @@ interface DataTablePaginationProps<TData> {
 export function DataTablePagination<TData>({
     table,
 }: DataTablePaginationProps<TData>) {
+
+
     return (
         <div className="flex items-center justify-between">
             <div className="flex-1 text-sm text-muted-foreground">
@@ -31,7 +34,7 @@ export function DataTablePagination<TData>({
                             <SelectValue placeholder={table.getState().pagination.pageSize} />
                         </SelectTrigger>
                         <SelectContent side="top">
-                            {[5, 10, 15, 20, 25].map((pageSize) => (
+                            {[8, 16, 24, 32, 40].map((pageSize) => (
                                 <SelectItem key={pageSize} value={`${pageSize}`}>
                                     {pageSize}
                                 </SelectItem>

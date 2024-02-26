@@ -1,18 +1,20 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 
 import { columns } from "./_components/columns"
 import { DataTable } from './_components/data-table';
 import { users } from './data/users';
+import Loading from './loading';
 
 const UsersPage = () => {
 
     return (
-        <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-semibold uppercase">Quản lý người dùng</h1>
-            <div className="py-5">
-                <DataTable columns={columns} data={users} />
-            </div>
-        </div>
+        <section className="flex flex-col gap-2 ">
+            <Suspense fallback={<Loading />}>
+                <div className="lg:py-0 py-5">
+                    <DataTable columns={columns} data={users} />
+                </div>
+            </Suspense>
+        </section>
     );
 };
 

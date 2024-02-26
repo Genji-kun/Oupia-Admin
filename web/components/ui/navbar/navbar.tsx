@@ -27,7 +27,7 @@ const Navbar = () => {
     }
 
     return (
-        <nav className="h-[80px] flex items-center border-b border-border justify-between p-5 dark:bg-slate-900">
+        <nav className="h-[80px] flex items-center border-b border-border justify-between p-5 xl:px-8 dark:bg-slate-900">
             <div className="hidden lg:flex items-center">
                 <BreadCumb />
             </div>

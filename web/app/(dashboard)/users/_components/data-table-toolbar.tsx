@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Table } from "@tanstack/react-table"
 import { Settings2, UserRoundPlus, X } from "lucide-react"
 import Link from "next/link"
+import { roles } from "../data/data"
+import { DataTableFacetedFilter } from "./data-table-faceted-fllter"
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>
@@ -14,7 +16,8 @@ interface DataTableToolbarProps<TData> {
 export function DataTableToolbar<TData>({
     table,
 }: DataTableToolbarProps<TData>) {
-    const isFiltered = (table.getColumn("fullName")?.getFilterValue() as string)?.length > 0;
+    const isFiltered = (table.getColumn("fullName")?.getFilterValue() as string)?.length > 0 || table.getState().columnFilters.length > 0;
+
 
     return (
         <div className="flex items-center justify-between w-full">
@@ -27,6 +30,14 @@ export function DataTableToolbar<TData>({
                     }
                     className="max-w-sm"
                 />
+                {table.getColumn("role") && (
+                    <DataTableFacetedFilter
+                        column={table.getColumn("role")}
+                        title="Phân quyền"
+                        options={roles}
+                    />
+                )}
+
                 {isFiltered && (
                     <Button
                         variant="ghost"
