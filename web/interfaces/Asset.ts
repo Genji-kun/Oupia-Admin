@@ -4,14 +4,15 @@ import { User } from "./User";
 export interface Asset {
     name: string,
     description: string,
-    slug: string,
+    slug?: string,
     location: string,
-    createAt: Date,
+    createAt?: Date,
     isDeleted?: boolean,
     user: User,
-    assetType: AssetType,
-    imageList: Image[],
-    price?: number
+    assetType?: AssetType,
+    imageList?: Image[],
+    price?: number,
+    area?: number
 }
 
 export interface AssetType {

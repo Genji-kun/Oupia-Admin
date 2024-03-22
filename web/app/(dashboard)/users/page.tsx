@@ -9,12 +9,12 @@ const UsersPage = () => {
 
     return (
         <section className="flex flex-col gap-2 ">
-            <Suspense fallback={<Loading />}>
-                <div className="lg:py-0 py-5">
+            <div className="lg:py-0 py-5">
+                <Suspense fallback={<Loading />}>
                     <DataTable columns={columns} data={users} />
-                </div>
-            </Suspense>
-        </section>
+                </Suspense>
+            </div>
+        </section >
     );
 };
 

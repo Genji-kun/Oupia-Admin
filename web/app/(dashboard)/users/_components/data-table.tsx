@@ -52,8 +52,8 @@ export function DataTable<TData, TValue>({
             <div className="flex items-center">
                 <DataTableToolbar table={table} />
             </div>
-            <div className="rounded-md border">
-                <Table className="bg-background dark:bg-slate-900">
+            <div className="rounded-md border-border border">
+                <Table className="bg-background rounded-md  dark:bg-slate-900">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>

@@ -26,11 +26,11 @@ const Sidebar = ({ children }: { children: React.ReactNode }) => {
                     <NavbarLogo />
                 </div>
                 <Button variant={"ghost"} className="px-4 py-7" onClick={() => setExpanded(curr => !curr)}>
-                    {expanded ? <ChevronFirst /> : <ChevronLast />}
+                    {expanded! ? <ChevronFirst /> : <ChevronLast />}
                 </Button>
             </div>
             <nav className="h-full flex flex-col shadow-sm">
-                <SidebarContext.Provider value={expanded}>
+                <SidebarContext.Provider value={expanded!}>
                     <ul className="flex flex-col gap-2 p-3">
                         {children}
                     </ul>
@@ -50,7 +50,7 @@ const SidebarItem = ({ icon, label, href }: { icon: React.ReactNode, label: stri
 
     return (
         <li className="relative group">
-            <Link href={href} className={cn("flex items-center p-4 rounded hover:bg-border", isActive && "text-primary-500 bg-primary-600/20 hover:bg-primary-600/20 dark:bg-primary-900/40 dark:hover:bg-primary-900/40")}>
+            <Link href={href} className={cn("flex items-center p-4 rounded hover:bg-border relative after:content-[''] after:absolute after:w-[3px] after:bg-primary-500 after:-right-3 after:top-0 after:h-0 hover:after:h-full after:transition-all", isActive && "text-primary-500 bg-primary-600/20 hover:bg-primary-600/20 dark:bg-primary-900/40 dark:hover:bg-primary-900/40 after:h-full")}>
                 {icon}
                 <span className={cn("font-semibold overflow-hidden transition-all text-nowrap", expanded ? "w-52 ml-3" : "w-0")}>{label}</span>
             </Link>

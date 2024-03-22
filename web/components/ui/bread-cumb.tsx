@@ -18,12 +18,12 @@ const BreadCumb = () => {
             <ol className="inline-flex items-center space-x-2">
                 {crumbs.length === 0 ?
                     <li>
-                        <span className="text-foreground/50 uppercase font-semibold">
+                        <span className="uppercase font-semibold">
                             Bảng điều khiển
                         </span>
                     </li> : <li className="flex items-center gap-1">
 
-                        <Link href="/" className="text-foreground/50 uppercase font-semibold hover:text-foreground relative after:transition-all after:w-0 after:absolute after:left-0 after:bottom-0 after:bg-foreground after:h-[1px] after:content-[''] hover:after:w-full">
+                        <Link href="/" className="text-foreground/50 uppercase font-semibold hover:text-foreground relative after:transition-all after:w-0 after:absolute after:left-0 after:bottom-[2px] after:bg-foreground after:h-[1px] after:content-[''] hover:after:w-full">
                             Bảng điều khiển
                         </Link>
                         <ChevronRight className="text-foreground/50 w-4 h-4" />

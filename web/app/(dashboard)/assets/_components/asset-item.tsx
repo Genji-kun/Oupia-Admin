@@ -12,9 +12,9 @@ const AssetItem = ({ asset }: { asset: Asset }) => {
     const [isHover, setIsHover] = useState(false);
 
     return (
-        <div onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)} className="flex flex-col gap-2 border border-border rounded p-5 bg-background dark:bg-slate-900">
+        <div onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)} className="flex flex-col gap-2 border border-border hover:border-foreground rounded p-5 bg-background dark:bg-slate-900">
             <div className="grid grid-cols-10 gap-4 items-center">
-                <h3 className={cn("font-semibold uppercase text-lg truncate w-max col-span-7 relative after:transition-all after:w-0 after:absolute after:left-0 after:bottom-0 after:bg-foreground after:h-[1px] after:content-[''] ", isHover && "after:w-full")}>{asset.name}</h3>
+                <h3 className={cn("font-semibold uppercase text-lg truncate w-max col-span-7 relative after:transition-all after:w-0 after:absolute after:left-0 after:bottom-[2px] after:bg-foreground after:h-[1px] after:content-[''] ", isHover && "after:w-full")}>{asset.name}</h3>
                 <div className="col-start-10 ml-auto">
                     <Button variant={"ghost"} className="aspect-square p-2 rounded-full">
                         <MoreHorizontal className="w-4 h-4" />

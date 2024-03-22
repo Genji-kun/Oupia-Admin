@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -8,19 +8,46 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { vi } from "date-fns/locale";
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Search } from 'lucide-react';
 import Link from 'next/link';
 import { MdOutlineAddHomeWork } from 'react-icons/md';
+import { useRouter } from 'next/navigation';
 
 const AssetFilterBar = () => {
 
-    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [searchTerm, setSearchTerm] = useState<string>();
+    const router = useRouter();
+    useEffect(() => {
+        if (selectedDate && searchTerm) {
+            const delayDebounceFn = setTimeout(() => {
+                router.push(`?kw=${searchTerm}&date=${format(selectedDate, "dd-MM-yyyy")}`);
+            }, 1000)
+            return () => clearTimeout(delayDebounceFn);
+        }
+        if (searchTerm) {
+            const delayDebounceFn = setTimeout(() => {
+                router.push(`?kw=${searchTerm}`);
+            }, 1000)
+            return () => clearTimeout(delayDebounceFn);
+        }
+        if (selectedDate) {
+            const delayDebounceFn = setTimeout(() => {
+                router.push(`?date=${format(selectedDate, "dd-MM-yyyy")}`);
+            }, 1000)
+            return () => clearTimeout(delayDebounceFn);
+        }
+    }, [searchTerm, selectedDate])
 
     return (
         <div className="grid grid-cols-2 gap-2">
-            <Input
-                className="col-span-2"
-                placeholder="Tìm kiếm tên căn hộ..." />
+            <div className="col-span-2 relative">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4" />
+                <Input
+                    className="pl-8"
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Tìm kiếm tên căn hộ..." />
+            </div>
             <Popover >
                 <PopoverTrigger asChild>
                     <Button
