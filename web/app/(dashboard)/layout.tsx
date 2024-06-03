@@ -4,6 +4,7 @@ import { PiUsers, PiNotePencil } from "react-icons/pi";
 import { HiOutlineBuildingOffice2 } from "react-icons/hi2";
 import React from 'react';
 import Navbar from '@/components/ui/navbar/navbar';
+import dynamic from 'next/dynamic';
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     return (
@@ -26,4 +27,4 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     );
 };
 
-export default DashboardLayout;
+export default dynamic(() => Promise.resolve(DashboardLayout),{ssr: false});

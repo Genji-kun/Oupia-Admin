@@ -3,29 +3,29 @@
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import NavbarLogo from './navbar/navbar-logo';
 import { Button } from './button';
 import { ChevronFirst, ChevronLast } from 'lucide-react';
+import { useAppContext } from '@/contexts/app-context';
 
 const SidebarContext = createContext<boolean | undefined>(undefined);
 const Sidebar = ({ children }: { children: React.ReactNode }) => {
 
-    const [expanded, setExpanded] = useState(() => {
-        return localStorage.getItem('sidebar') === 'true' ? true : false;
-    });
+    const { currentUser } = useAppContext();
+    const [expanded, setExpanded] = useState<any>(false);
 
-    useEffect(() => {
-        localStorage.setItem('sidebar', String(expanded));
-    }, [expanded]);
+    if (!currentUser) {
+        return <></>
+    }
 
     return (
-        <aside className="dark:bg-slate-900 hidden lg:block border-r border-border">
+        <aside className="dark:bg-oupia-base hidden lg:block border-r border-border">
             <div className="p-3 flex items-center justify-center ">
                 <div className={cn("overflow-hidden transition-all px-3 w-56", !expanded && "w-0 px-0")}>
                     <NavbarLogo />
                 </div>
-                <Button variant={"ghost"} className="px-4 py-7" onClick={() => setExpanded(curr => !curr)}>
+                <Button variant={"ghost"} className="px-4 py-7" onClick={() => setExpanded((curr: any) => !curr)}>
                     {expanded! ? <ChevronFirst /> : <ChevronLast />}
                 </Button>
             </div>
@@ -44,9 +44,13 @@ const SidebarItem = ({ icon, label, href }: { icon: React.ReactNode, label: stri
 
     const pathname = usePathname();
     const isActive = (pathname === "/" && href === "/") || pathname === href || (pathname !== "/" && pathname?.startsWith(`${href}/`));
+    const { currentUser } = useAppContext();
 
     const expanded = useContext(SidebarContext);
 
+    if (!currentUser) {
+        return <></>
+    }
 
     return (
         <li className="relative group">
@@ -68,5 +72,4 @@ const SidebarItem = ({ icon, label, href }: { icon: React.ReactNode, label: stri
         </li >
     );
 }
-
 export { Sidebar, SidebarItem };

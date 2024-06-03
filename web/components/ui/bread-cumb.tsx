@@ -46,7 +46,8 @@ const BreadCumb = () => {
                         case "posts":
                             routeName = "Quản lý bài viết";
                             break;
-
+                        default:
+                            routeName = "Xem chi tiết";
                     }
 
                     if (isLast(index)) {

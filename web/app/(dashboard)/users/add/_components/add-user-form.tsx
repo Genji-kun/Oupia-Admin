@@ -17,6 +17,11 @@ import { vi } from "date-fns/locale";
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
+import { UserRequest } from '@/interfaces/User';
+import { authApi, publicApi } from '@/configs/axiosInstance';
+import { userEndpoints } from '@/configs/axiosEndpoints';
+import { toast } from 'sonner'
+import { useParams } from 'next/navigation';
 
 const formSchema = z.object({
     fullName: z.string().min(4,
@@ -30,13 +35,13 @@ const formSchema = z.object({
     }).email({
         message: "Không đúng định dạng email",
     }),
-    gender: z.enum(["MALE", "FEMALE", "ORTHER"], {
+    gender: z.enum(["MALE", "FEMALE", "OTHER"], {
         required_error: "Vui lòng chọn thông tin"
     }),
     dob: z.date({
         required_error: "Chưa chọn ngày sinh",
     }),
-    role: z.enum(["TENANT", "LANDLORD", "ADMIN"], {
+    role: z.enum(["ROLE_TENANT", "ROLE_LANDLORD", "ROLE_ADMIN"], {
         required_error: "Vui lòng chọn thông tin"
     }),
     avatar: z.instanceof(File).optional(),
@@ -56,76 +61,125 @@ const formSchema = z.object({
     ),
 })
 
-const AddUserForm = () => {
+const checkUserIsExisted = async (username: string) => {
+    try {
+        const res = await authApi.get(userEndpoints.getUserByUsername(username));
+        if (res.status === 200) {
+            return true;
+        }
+    } catch (error: any) {
+        if (error.response.data.code === "1001")
+            return false;
+    }
+
+}
+
+const AddUserForm : React.FC = () => {
+
+    const [avatar, setAvatar] = useState("");
+    const [userRequest, setUserRequest] = useState<UserRequest | any>();
+    const [account, setAccount] = useState(userRequest ? userRequest.account : {});
+    const [avatarFile, setAvatarFile] = useState<File | undefined>();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { id } = useParams<{id : string}>();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            fullName: "",
-            phoneNumber: "",
-            email: "",
-            gender: undefined,
-            dob: undefined,
-            role: undefined,
-            avatar: undefined,
-            username: "",
-            password: "",
+            fullName: userRequest ? userRequest.fullName : "",
+            phoneNumber: userRequest ? userRequest.phoneNumber: "",
+            email: userRequest ? userRequest.email: "",
+            gender: userRequest ? userRequest.gender : undefined ,
+            dob:  userRequest ? userRequest.dob : undefined,
+            role:  userRequest ? userRequest.role : undefined,
+            avatar: avatarFile,
+            username: userRequest ? userRequest.account?.username : "",
+            password: userRequest ? userRequest.account?.password : "",
             confirm: "",
         },
     })
 
-    const [avatar, setAvatar] = useState("");
-    const [account, setAccount] = useState({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
+    useEffect(() => {
+        form.reset({
+            
+        })
+    }, [id])
 
     const fileInputRef = useRef(null);
-    const handleFileChange = (evt: any) => {
-        if (evt.target.files && evt.target.files[0]) {
-            const file: File = evt.target.files[0];
-            const fileURL = URL.createObjectURL(file);
-            setAvatar(fileURL);
-
-        }
-    };
-
-
 
     useEffect(() => {
         const subscription = form.watch((values: any) => {
             for (const key in values) {
                 if (values[key]) {
-                    if (key === "username" || key === "password" || key === "confirm") {
+                    if (key === "username" || key === "password") {
                         setAccount((current: any) => {
                             return { ...current, [key]: values[key] };
                         });
+                    } else if (key !== "confirm") {
+                        setUserRequest((current: any) => {
+                            return { ...current, [key]: values[key] }
+                        })
                     }
                 }
             }
 
         });
-
         return () => {
             subscription.unsubscribe();
         };
     }, [form]);
 
     useEffect(() => {
+        setUserRequest((current: any) => {
+            return { ...current, account: account };
+        });
+    }, [account, setUserRequest]);
 
-    }, [account]);
+    const handleFileChange = (evt: any) => {
+        if (evt.target.files && evt.target.files[0]) {
+            const file: File = evt.target.files[0];
+            const fileURL = URL.createObjectURL(file);
+            setAvatar(fileURL);
+            setAvatarFile(file);
+        }
+    };
 
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    const addUser = async (user: any, avatarFile: File | undefined) => {
+        const form = new FormData();
+        form.append('user', new Blob([JSON.stringify(user)], { type: "application/json" }))
+        if(avatarFile) {
+            form.append("avatarFile", avatarFile);
+        }
+        try {
+            const res = await authApi.post(userEndpoints["addUser"], form);
+            if (res.status === 200) {
+                toast.success("Đăng ký người dùng thành công");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Đã có lỗi xảy ra, vui lòng thử lại.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    }    
+    
+    const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsSubmitting(true);
-        console.log(values);
-
+        if (await checkUserIsExisted(values.username)) {
+            toast.error("Tên người dùng đã tồn tại, vui lòng đổi tên khác.");
+            setIsSubmitting(false);
+            return;
+        } else {
+            addUser(userRequest, avatarFile);
+        }
     }
 
     return (
         <div className="flex flex-col gap-2">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className=" grid grid-cols-2 gap-5 h-full">
-                    <div className="col-span-2 xl:col-span-1 flex flex-col p-6 xl:p-10 gap-5 border boreder rounded-lg bg-background dark:bg-slate-900">
+                    <div className="col-span-2 xl:col-span-1 flex flex-col p-6 xl:p-10 gap-5 border boreder rounded-lg bg-background dark:bg-oupia-base">
                         <h1 className="font-semibold text-2xl">Thông tin người dùng</h1>
                         <Separator />
                         <FormField
@@ -135,7 +189,7 @@ const AddUserForm = () => {
                                 <FormItem >
                                     <FormLabel className="text-base font-semibold text-foreground">Họ tên người dùng</FormLabel>
                                     <FormControl>
-                                        <Input {...field} type="text" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-slate-700" />
+                                        <Input {...field} type="text" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-oupia-sub" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -151,14 +205,14 @@ const AddUserForm = () => {
                                         <FormLabel className="text-base font-semibold text-foreground">Giới tính</FormLabel>
                                         <Select disabled={isSubmitting} onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger className="dark:bg-slate-700 bg-border/40">
+                                                <SelectTrigger className="dark:bg-oupia-sub bg-border/40">
                                                     <SelectValue />
                                                 </SelectTrigger>
                                             </FormControl>
-                                            <SelectContent className="dark:bg-slate-700">
+                                            <SelectContent className="dark:bg-oupia-sub">
                                                 <SelectItem value="MALE">Nam</SelectItem>
                                                 <SelectItem value="FEMALE">Nữ</SelectItem>
-                                                <SelectItem value="ORTHER">Khác</SelectItem>
+                                                <SelectItem value="OTHER">Khác</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />
@@ -178,13 +232,13 @@ const AddUserForm = () => {
                                                         <Button
                                                             variant={"outline"}
                                                             className={cn(
-                                                                "w-full text-left font-normal dark:bg-slate-700 bg-border/40",
+                                                                "w-full text-left font-normal dark:bg-oupia-sub bg-border/40",
                                                                 !field.value && "text-muted-foreground dark:text-foreground"
                                                             )}
                                                             disabled={isSubmitting}
                                                         >
                                                             {field.value ? (
-                                                                format(field.value, "PPP", { locale: vi })
+                                                                format(field.value, "dd-MM-yyyy")
                                                             ) : (
                                                                 <span>Chọn ngày sinh</span>
                                                             )}
@@ -221,7 +275,7 @@ const AddUserForm = () => {
                                 <FormItem >
                                     <FormLabel className="text-base font-semibold text-foreground">Tài khoản email</FormLabel>
                                     <FormControl>
-                                        <Input {...field} type="email" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-slate-700" />
+                                        <Input {...field} type="email" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-oupia-sub" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -234,7 +288,7 @@ const AddUserForm = () => {
                                 <FormItem>
                                     <FormLabel className="text-base font-semibold text-foreground">Số điện thoại</FormLabel>
                                     <FormControl>
-                                        <Input {...field} type="phone" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-slate-700" />
+                                        <Input {...field} type="phone" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-oupia-sub" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -248,14 +302,14 @@ const AddUserForm = () => {
                                     <FormLabel className="text-base font-semibold text-foreground">Phân quyền truy cập</FormLabel>
                                     <Select disabled={isSubmitting} onValueChange={field.onChange} defaultValue={field.value}>
                                         <FormControl>
-                                            <SelectTrigger className="dark:bg-slate-700 bg-border/40">
+                                            <SelectTrigger className="dark:bg-oupia-sub bg-border/40">
                                                 <SelectValue />
                                             </SelectTrigger>
                                         </FormControl>
-                                        <SelectContent className="dark:bg-slate-700">
-                                            <SelectItem value="TENANT">Người thuê</SelectItem>
-                                            <SelectItem value="LANDLORD">Người cho thuê</SelectItem>
-                                            <SelectItem value="ADMIN">Quản trị viên</SelectItem>
+                                        <SelectContent className="dark:bg-oupia-sub">
+                                            <SelectItem value="ROLE_TENANT">Người thuê</SelectItem>
+                                            <SelectItem value="ROLE_LANDLORD">Người cho thuê</SelectItem>
+                                            <SelectItem value="ROLE_ADMIN">Quản trị viên</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -264,7 +318,7 @@ const AddUserForm = () => {
                         />
                     </div>
 
-                    <div className=" col-span-2 xl:col-span-1 flex flex-col p-6 xl:p-10 gap-5 border boreder rounded-lg bg-background  dark:bg-slate-900">
+                    <div className=" col-span-2 xl:col-span-1 flex flex-col p-6 xl:p-10 gap-5 border boreder rounded-lg bg-background  dark:bg-oupia-base">
                         <h1 className="font-semibold text-2xl">Thông tin tài khoản</h1>
                         <Separator />
                         <FormField
@@ -290,7 +344,7 @@ const AddUserForm = () => {
                                                     accept='image/png, image/jpeg, image/jpg'
                                                     multiple={false}
                                                     disabled={isSubmitting}
-                                                    className="text-base bg-border/40 dark:bg-slate-700 mt-2"
+                                                    className="text-base bg-border/40 dark:bg-oupia-sub mt-2"
                                                     ref={fileInputRef}
                                                     onChange={handleFileChange} />
                                                 <FormDescription>
@@ -311,7 +365,7 @@ const AddUserForm = () => {
                                 <FormItem >
                                     <FormLabel className="text-base font-semibold text-foreground">Tên người dùng</FormLabel>
                                     <FormControl>
-                                        <Input {...field} type="text" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-slate-700" />
+                                        <Input {...field} type="text" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-oupia-sub" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -326,7 +380,7 @@ const AddUserForm = () => {
                                     <FormItem >
                                         <FormLabel className="text-base font-semibold text-foreground">Mật khẩu</FormLabel>
                                         <FormControl>
-                                            <Input {...field} type="password" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-slate-700" />
+                                            <Input {...field} type="password" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-oupia-sub" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -339,7 +393,7 @@ const AddUserForm = () => {
                                     <FormItem>
                                         <FormLabel className="text-base font-semibold text-foreground">Mật khẩu xác nhận</FormLabel>
                                         <FormControl>
-                                            <Input {...field} type="password" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-slate-700" />
+                                            <Input {...field} type="password" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-oupia-sub" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -355,7 +409,7 @@ const AddUserForm = () => {
                             </Button>
                         </> : <>
                             <div className="w-fit flex gap-x-2 items-center ml-auto pt-2">
-                                <Button onClick={() => { form.reset(); setAvatar(""); }} type="button" variant={"outline"} className=" w-fit flex gap-2 px-6 py-4">
+                                <Button onClick={() => { setUserRequest(undefined); setAvatar(""); setAvatarFile(undefined); }} type="button" variant={"outline"} className=" w-fit flex gap-2 px-6 py-4">
                                     <span className="text-base">Xóa thông tin nhập</span>
                                 </Button>
                                 <Button type="submit" className=" w-fit styled-button flex gap-2 px-6 py-4">

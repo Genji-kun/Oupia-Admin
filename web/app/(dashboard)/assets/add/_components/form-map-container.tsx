@@ -13,10 +13,6 @@ const FormMapContainer = () => {
         zoom: 9
     });
 
-    useEffect(() => {
-        console.log(process.env.NEXT_PUBLIC_GOONG_MAPS_API_KEY);
-    }, [])
-
 
     return (
         <div className="map-container h-full w-full overflow-hidden border border-border rounded-lg bg-border/40 dark:bg-slate-700">

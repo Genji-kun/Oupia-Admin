@@ -1,43 +1,34 @@
 "use client"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
 import { Button } from '@/components/ui/button';
-import { Filter } from 'lucide-react';
-import { MdOutlineAddHomeWork } from "react-icons/md";
+import { Input } from '@/components/ui/input';
+import { useAssetManagementContext } from '@/contexts/asset-management-context';
 import Link from 'next/link';
+import React from 'react'
 
-import React from 'react';
+function AssetToolbar() {
 
-const AssetToolbar = () => {
+    const { keyword, setKeyword } = useAssetManagementContext();
+
     return (
-        <>
-            {/* <div className="flex items-center justify-between pb-5 border-b border-border">
-                <div className="flex items-center gap-5">
-                    <h1 className="uppercase font-semibold text-xl">DANH SÁCH CĂN HỘ</h1>
-                    <Tabs defaultValue="account" className="w-[400px]">
-                        <TabsList>
-                            <TabsTrigger value="account">Chưa được duyệt</TabsTrigger>
-                            <TabsTrigger value="account1">Đang hoạt động</TabsTrigger>
-                            <TabsTrigger value="password">Đã đóng</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                </div>
-                <div className="flex items-center gap-5 justify-end">
-                    <Button variant={"outline"} className="space-x-2 ">
-                        <Filter className="w-4 h-4 " />
-                        <span className="text-sm">Lọc danh sách</span>
+        <div className="w-full flex justify-between items-center">
+            <div className="flex gap-2 items-center">
+                <Input
+                    className="min-w-96 max-w-lg"
+                    placeholder='Tìm kiếm tên căn hộ...'
+                    value={keyword}
+                    onChange={(evt) => setKeyword(evt.target.value)}
+                />
+            </div>
+            <div className="flex gap-2 items-center">
+                <Link href="/assets/add">
+                    <Button className="styled-button font-normal">
+                        <span> Thêm căn hộ mới </span>
                     </Button>
-                    <Link href="/assets/add">
-                        <Button className="space-x-2 styled-button">
-                            <MdOutlineAddHomeWork className="w-4 h-4 " />
-                            <span className="text-sm">Tạo mới</span>
-                        </Button>
-                    </Link>
-                </div>
-            </div> */}
-
-        </>
-
-    );
-};
+                </Link>
+            </div>
+        </div>
+    )
+}
 
 export default AssetToolbar;

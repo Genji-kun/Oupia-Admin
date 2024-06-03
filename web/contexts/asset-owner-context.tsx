@@ -1,31 +1,52 @@
 "use client"
 
-import { User } from '@/interfaces/User';
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { searchEndpoints } from '@/configs/axiosEndpoints';
+import { authApi } from '@/configs/axiosInstance';
+import { UserResponse } from '@/interfaces/User';
+import { useQuery } from '@tanstack/react-query';
+import React, { createContext, useState, useContext, ReactNode, useEffect } from 'react';
 
 interface IAssetOwnerContext {
-    user: User | undefined;
-    setUser: React.Dispatch<React.SetStateAction<User | undefined>>;
+    user: UserResponse | undefined;
+    setUser: React.Dispatch<React.SetStateAction<UserResponse | undefined>>;
+    users: UserResponse[];
+    isFetching: boolean;
+    keyword: string;
+    setKeyword: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const AssetOwnerContext = createContext<IAssetOwnerContext | undefined>(undefined);
 
 export const AssetOwnerProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
-    const [user, setUser] = useState<User | undefined>({
-        avatar: "https://res.cloudinary.com/dzba4fewa/image/upload/v1697418342/bqiphv8ijowcb1ao2w8f.jpg",
-        fullName: "Nguyễn Kim Bảo Ngân",
-        gender: "FEMALE",
-        email: "nguyenkimbaongan@gmail.com",
-        dob: new Date("02-06-2002"),
-        role: ["ROLE_ADMIN"],
-        account: {
-            username: "ngan020602"
+    const searchUser = async (keyword: string) => {
+        const paramsReq = keyword ? { keyword: keyword, size: 5 } : { size: 5 };
+        try {
+            const res = await authApi.get(searchEndpoints["users"], {
+                params: paramsReq
+            })
+            return res.data.content; 
+        } catch(error) {
+            console.error(error);
         }
-    });
+    } 
+
+    const [user, setUser] = useState<UserResponse | undefined>();
+    const [keyword, setKeyword] = useState<string>("");
+
+    const { data: users, isFetching } = useQuery({
+        queryKey: ["searchUser", keyword],
+        queryFn: () => searchUser(keyword),
+    })
+
+    useEffect(() => {
+        if (keyword) {
+            searchUser(keyword);
+        }
+    }, [keyword])
 
     return (
-        <AssetOwnerContext.Provider value={{ user, setUser }}>
+        <AssetOwnerContext.Provider value={{ user, setUser, users, isFetching, keyword, setKeyword }}>
             {children}
         </AssetOwnerContext.Provider>
     );

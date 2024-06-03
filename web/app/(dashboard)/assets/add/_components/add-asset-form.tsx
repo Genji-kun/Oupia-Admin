@@ -16,7 +16,6 @@ import Image from 'next/image';
 import { numberToCurrency } from '@/utils/priceConvert';
 import SelectedUserInfo from './selected-user-info';
 import { useAssetOwnerContext } from '@/contexts/asset-owner-context';
-import { Asset } from '@/interfaces/Asset';
 
 const formSchema = z.object({
     name: z.string({
@@ -43,7 +42,12 @@ const formSchema = z.object({
     assetType: z.string({
         required_error: "Chưa điền địa chỉ của căn hộ.",
     }),
-
+    maxPeople: z.coerce.number({
+        required_error: "Chưa có thông tin.",
+        invalid_type_error: "Số người tối đa phải là một số."
+    }).min(1, {
+        message: "Số người tối đa phải lớn hơn 0",
+    }),
     price: z.coerce.number({
         required_error: "Chưa có thông tin giá thuê.",
         invalid_type_error: "Giá thuê phải là một số."
@@ -55,6 +59,8 @@ const formSchema = z.object({
 
     fullLocation: z.string({
         required_error: "Chưa điền địa chỉ của căn hộ.",
+    }).min(10, {
+        message: "Địa chỉ không phù hợp",
     }),
 
 })
@@ -69,7 +75,8 @@ const AddAssetForm = () => {
             area: undefined,
             fullLocation: undefined,
             assetType: undefined,
-            price: undefined
+            price: undefined,
+            maxPeople: undefined,
         },
     })
 
@@ -78,6 +85,8 @@ const AddAssetForm = () => {
 
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const [isAddingUser, setIsAddingUser] = useState<boolean>(false);
+
+    const [errorMsg, setErrorMsg] = useState<any>({});
 
     const { user } = useAssetOwnerContext();
 
@@ -106,24 +115,25 @@ const AddAssetForm = () => {
         };
     }, [form]);
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        const asset = {
-            name: values.name,
-            description: values.description,
-            location: values.fullLocation,
-            price: values.price,
-            area: values.area,
-            user: user!,
-            imageList: imageList,
-        };
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+
+        // const asset = {
+        //     name: values.name,
+        //     description: values.description,
+        //     location: values.fullLocation,
+        //     price: values.price,
+        //     area: values.area,
+        //     user: user!,
+        //     imageList: imageList,
+        // };
 
         try {
             const form = new FormData();
-            form.append("asset", JSON.stringify(asset));
-            setIsSubmitting(true);
-            console.log(asset);
-        } catch (ex) {
-            console.error(ex);
+            // form.append("asset", JSON.stringify(asset));
+            // setIsSubmitting(true);
+            // console.log(asset);
+        } catch (error) {
+            console.error(error);
         }
     }
 
@@ -131,7 +141,7 @@ const AddAssetForm = () => {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className=" grid grid-cols-2 gap-5 h-full relative">
                 <div className="col-span-2 xl:col-span-1 flex flex-col gap-5">
-                    <div className="flex flex-col p-6 xl:p-10 gap-5 border rounded-lg bg-background dark:bg-slate-900">
+                    <div className="flex flex-col p-6 xl:p-10 gap-5 border rounded-lg bg-background dark:bg-oupia-base">
                         <h1 className="font-semibold text-2xl">Thông tin về căn hộ</h1>
                         <Separator />
                         <FormField
@@ -139,28 +149,27 @@ const AddAssetForm = () => {
                             name="name"
                             render={({ field }) => (
                                 <FormItem >
-                                    <FormLabel className="text-base font-semibold text-foreground">Tên căn hộ</FormLabel>
+                                    <FormLabel className="text-muted-foreground">Tên căn hộ</FormLabel>
                                     <FormControl>
-                                        <Input maxLength={60} {...field} type="text" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-slate-700" />
+                                        <Input maxLength={60} {...field} type="text" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-oupia-sub" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-
                         <FormField
                             control={form.control}
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-base font-semibold text-foreground">Nội dung miêu tả</FormLabel>
+                                    <FormLabel className="text-muted-foreground">Nội dung miêu tả</FormLabel>
                                     <FormControl>
                                         <Textarea
                                             {...field}
                                             disabled={isSubmitting}
                                             rows={4}
                                             maxLength={3100}
-                                            className="text-base bg-border/40 dark:bg-slate-700" />
+                                            className="text-base bg-border/40 dark:bg-oupia-sub" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -172,14 +181,14 @@ const AddAssetForm = () => {
                                 name="assetType"
                                 render={({ field }) => (
                                     <FormItem >
-                                        <FormLabel className="text-base font-semibold text-foreground">Loại hình căn hộ</FormLabel>
+                                        <FormLabel className="text-muted-foreground">Loại hình căn hộ</FormLabel>
                                         <Select disabled={isSubmitting} onValueChange={field.onChange} defaultValue={field.value}>
                                             <FormControl>
-                                                <SelectTrigger className="dark:bg-slate-700 bg-border/40">
+                                                <SelectTrigger className="dark:bg-oupia-sub bg-border/40">
                                                     <SelectValue />
                                                 </SelectTrigger>
                                             </FormControl>
-                                            <SelectContent className="dark:bg-slate-700">
+                                            <SelectContent className="dark:bg-oupia-sub">
                                                 <SelectItem value="MALE">Căn hộ</SelectItem>
                                                 <SelectItem value="FEMALE">Nguyên căn</SelectItem>
                                                 <SelectItem value="ORTHER">Kí túc xá</SelectItem>
@@ -194,13 +203,13 @@ const AddAssetForm = () => {
                                 name="area"
                                 render={({ field }) => (
                                     <FormItem >
-                                        <FormLabel className="text-base font-semibold text-foreground">Diện tích</FormLabel>
+                                        <FormLabel className="text-muted-foreground">Diện tích</FormLabel>
                                         <FormControl>
                                             <div className="relative">
                                                 <Input
                                                     {...field}
                                                     disabled={isSubmitting}
-                                                    className="text-base bg-border/40 dark:bg-slate-700 pr-14">
+                                                    className="text-base bg-border/40 dark:bg-oupia-sub pr-14">
                                                 </Input>
                                                 <span className="absolute right-2 top-1/2 -translate-y-1/2 px-2 z-10 border-l-[1.75px] border-foreground"> m²</span>
                                             </div>
@@ -210,37 +219,59 @@ const AddAssetForm = () => {
                                 )}
                             />
                         </div>
+                        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                            <FormField
+                                control={form.control}
+                                name="price"
+                                render={({ field }) => (
+                                    <FormItem >
+                                        <FormLabel className="text-muted-foreground">Giá thuê căn hộ</FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Input
+                                                    {...field}
+                                                    disabled={isSubmitting}
+                                                    className="text-base bg-border/40 dark:bg-oupia-sub pr-20">
+                                                </Input>
+                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 px-2 z-10 border-l-[1.75px] border-foreground"> tháng</span>
+                                            </div>
+                                        </FormControl>
+                                        {price && < FormDescription >Số tiền hiển thị: <span className="text-primary font-bold">{numberToCurrency(Number(price))} VND</span></FormDescription>}
+                                        {field.value && !price && < FormDescription >Số tiền không hợp lệ hoặc quá lớn</FormDescription>}
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
 
-                        <FormField
-                            control={form.control}
-                            name="price"
-                            render={({ field }) => (
-                                <FormItem >
-                                    <FormLabel className="text-base font-semibold text-foreground">Giá thuê căn hộ</FormLabel>
-                                    <FormControl>
-                                        <div className="relative">
-                                            <Input
-                                                {...field}
-                                                disabled={isSubmitting}
-                                                className="text-base bg-border/40 dark:bg-slate-700 pr-20">
-                                            </Input>
-                                            <span className="absolute right-2 top-1/2 -translate-y-1/2 px-2 z-10 border-l-[1.75px] border-foreground"> tháng</span>
-                                        </div>
-                                    </FormControl>
-                                    {price && < FormDescription >Số tiền hiển thị: <span className="text-primary font-bold">{numberToCurrency(Number(price))} VND</span></FormDescription>}
-                                    {field.value && !price && < FormDescription >Số tiền không hợp lệ hoặc quá lớn</FormDescription>}
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                            <FormField
+                                control={form.control}
+                                name="maxPeople"
+                                render={({ field }) => (
+                                    <FormItem >
+                                        <FormLabel className="text-muted-foreground">Số người tối đa</FormLabel>
+                                        <FormControl>
+                                            <div className="relative">
+                                                <Input
+                                                    {...field}
+                                                    disabled={isSubmitting}
+                                                    className="text-base bg-border/40 dark:bg-oupia-sub pr-20">
+                                                </Input>
+                                                <span className="absolute right-2 top-1/2 -translate-y-1/2 px-2 z-10 border-l-[1.75px] border-foreground"> người</span>
+                                            </div>
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                     </div>
-                    <div className="flex flex-col p-6 xl:p-10 gap-5 border border-border rounded-lg bg-background dark:bg-slate-900">
+                    <div className="flex flex-col p-6 xl:p-10 gap-5 border border-border rounded-lg bg-background dark:bg-oupia-base">
                         <div className="grid grid-cols-10 gap-2 items-center">
                             <h1 className="font-semibold text-2xl col-span-6">Hình ảnh của căn hộ</h1>
                             {imageList && <h1 className=" col-span-4 text-right text-muted-foreground"> {imageList.length} hình ảnh</h1>}
                         </div>
                         <Separator />
-                        <div className="flex w-full justify-center rounded-lg border border-dashed dark:border-muted-foreground border-border px-6 py-10 dark:bg-slate-700">
+                        <div className="flex w-full justify-center rounded-lg border border-dashed dark:border-muted-foreground border-border px-6 py-10 dark:bg-oupia-sub">
                             <div className="text-center relative">
                                 <UploadCloud className="mx-auto h-12 w-12" aria-hidden="true" />
                                 <div className="mt-4 flex text-muted-foreground">
@@ -268,13 +299,13 @@ const AddAssetForm = () => {
                             <div className="grid grid-cols-6 gap-5 items-center">
                                 {imageList?.map((image, index) => (
                                     <div key={index} className="col-span-1 relative ">
-                                        <X className="text-destructive font-bold w-6 h-6 p-1 bg-background hover:bg-border dark:hover:bg-slate-700 dark:bg-slate-800 rounded-full absolute -right-2 -top-2 cursor-pointer" onClick={() => handleDelete(image)} />
+                                        <X className="text-destructive font-bold w-6 h-6 p-1 bg-background hover:bg-border dark:bg-oupia-base dark:hover:bg-oupia-sub rounded-full absolute -right-2 -top-2 cursor-pointer" onClick={() => handleDelete(image)} />
                                         <Image width={500} height={500} className="rounded-lg object-cover w-32 aspect-square" src={URL.createObjectURL(image)} alt={image.name} />
                                     </div>
                                 ))}
                             </div>)}
                     </div>
-                    <div className="flex flex-col p-6 xl:p-10 gap-5 border border-border rounded-lg bg-background dark:bg-slate-900">
+                    <div className="flex flex-col p-6 xl:p-10 gap-5 border border-border rounded-lg bg-background dark:bg-oupia-base">
                         <div className="grid grid-cols-10 gap-2 items-center">
                             <h1 className="font-semibold text-2xl col-span-6">Người sở hữu</h1>
                             {
@@ -295,9 +326,30 @@ const AddAssetForm = () => {
                         }
 
                     </div>
+                    <div className="flex flex-col p-6 xl:p-10 gap-5 border border-border rounded-lg bg-background dark:bg-oupia-base">
+                        <div className="grid grid-cols-10 gap-2 items-center">
+                            <h1 className="font-semibold text-2xl col-span-6">Tiện ích của căn hộ </h1>
+                            {
+                                !user && (!isAddingUser && <Button type="button" onClick={() => setIsAddingUser(true)} className="ml-auto w-fit styled-button flex gap-2 col-span-4">
+                                    <UserPlus2 size={20} />
+                                    <span className="text-base">Thêm tiện ích</span>
+                                </Button>)
+                            }
+
+                        </div>
+                        <Separator />
+
+                        {
+                            user ? <SelectedUserInfo user={user} /> : (isAddingUser ? <>
+                            </> : <>
+                                <span className="text-center text-muted-foreground">Chưa có người sở hữu của căn hộ.</span>
+                            </>)
+                        }
+
+                    </div>
                 </div>
                 <div className="col-span-2 xl:col-span-1 flex flex-col gap-5 sticky top-5 h-1/2">
-                    <div className="h-full flex flex-col p-6 xl:p-10 gap-5 border boreder rounded-lg bg-background dark:bg-slate-900">
+                    <div className="h-full flex flex-col p-6 xl:p-10 gap-5 border boreder rounded-lg bg-background dark:bg-oupia-base">
                         <h1 className="font-semibold text-2xl">Vị trí căn hộ</h1>
                         <Separator />
                         <FormField
@@ -305,9 +357,9 @@ const AddAssetForm = () => {
                             name="fullLocation"
                             render={({ field }) => (
                                 <FormItem >
-                                    <FormLabel className="text-base font-semibold text-foreground">Địa chỉ đầy đủ của căn hộ</FormLabel>
+                                    <FormLabel className="text-muted-foreground">Địa chỉ đầy đủ của căn hộ</FormLabel>
                                     <FormControl>
-                                        <Input {...field} type="text" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-slate-700" />
+                                        <Input {...field} type="text" disabled={isSubmitting} className="text-base bg-border/40 dark:bg-oupia-sub" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { ThemeProvider } from "@/components/providers/theme-provider";
 import { BeauSans } from "@/utils/fontGenerator";
+import Providers from "./providers";
+import { Toaster } from "@/components/ui/sonner";
 
 
 export const metadata: Metadata = {
@@ -17,9 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning={true}>
       <body className={BeauSans.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <Providers>
           {children}
-        </ThemeProvider>
+          <Toaster richColors />
+        </Providers>
       </body>
     </html>
   );

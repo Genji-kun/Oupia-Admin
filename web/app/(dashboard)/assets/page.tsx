@@ -1,20 +1,26 @@
-import React from 'react';
-import MapContainer from './_components/map-container';
-import AssetContainer from './_components/asset-container';
-import AssetInfomation from './_components/asset-information';
+"use client"
+
+import React, { Suspense } from 'react';
+import Loading from './loading';
+import dynamic from 'next/dynamic';
+import withAuth from '@/utils/withAuth';
+import { AssetManagementProvider } from '@/contexts/asset-management-context';
+import AssetDataTable from './_components/asset-data-table';
+import AssetPagination from './_components/asset-pagination';
+import AssetToolbar from './_components/asset-toolbar';
 
 const AssetsPage = () => {
     return (
-        <div className="grid grid-cols-4 2xl:grid-cols-10 gap-5 h-full relative">
-            <div className="col-span-4 space-y-5 h-full overflow-auto">
-                <AssetContainer />
-            </div>
-            <div className="2xl:grid grid-rows-2 gap-5 hidden col-span-6 h-[calc(100vh-2.5rem)] sticky top-5 bottom-5">
-                <MapContainer />
-                <AssetInfomation />
-            </div>
-        </div>
+        <AssetManagementProvider>
+            <section className="flex flex-col gap-4 w-full">
+                <Suspense fallback={<Loading />}>
+                    <AssetToolbar />
+                    <AssetDataTable />
+                    <AssetPagination />
+                </Suspense>
+            </section>
+        </AssetManagementProvider>
     );
 };
 
-export default AssetsPage;
+export default dynamic(() => Promise.resolve(withAuth(AssetsPage)), { ssr: false }); 

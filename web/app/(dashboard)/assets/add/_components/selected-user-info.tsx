@@ -1,11 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { useAssetOwnerContext } from '@/contexts/asset-owner-context';
-import { User } from '@/interfaces/User';
 import { Trash } from 'lucide-react';
 import Image from 'next/image';
 import React from 'react';
 
-const SelectedUserInfo = ({ user }: { user: User }) => {
+const SelectedUserInfo = ({ user }: { user: any }) => {
     const { setUser } = useAssetOwnerContext();
 
     return (
